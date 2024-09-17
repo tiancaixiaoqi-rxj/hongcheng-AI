@@ -359,12 +359,6 @@
         </div>
       </div>
       <!-- 遍历图表类型数组，生成每个图表类型的选项 -->
-      <select v-model="selectedChartType" class="chart-type-select">
-        <option value="">选择图表类型</option>
-        <option v-for="type in chartTypes" :key="type" :value="type">
-          {{ type }}
-        </option>
-      </select>
     </div>
 
     <script>
@@ -382,22 +376,12 @@
               hasImage: false,
             },
           ],
-          chartTypes: [
-            "垂直条形图",
-            "水平条形图",
-            "线型图",
-            "饼图",
-            "散点图",
-            "面积图",
-            "气泡图",
-            "雷达图",
-          ],
-          selectedChartType: "",
           uploadedFiles: [],
           userAvatarUrl: "",
         },
         methods: {
           //发送消息的方法
+
           sendMessage(event) {
             if (event && event.shiftKey) {
               return; // Allow Shift+Enter for new line
@@ -405,45 +389,50 @@
             // 如果用户输入的内容不为空或者有上传的文件
             if (this.userInput.trim() || this.uploadedFiles.length > 0) {
               let messageText = this.userInput.trim();
-              // 如果有上传的文件，在消息文本中添加附件信息
+              let formData = new FormData(); // 创建FormData对象来发送文件
+              // 如果有上传的文件，添加到FormData中
               if (this.uploadedFiles.length > 0) {
+                this.uploadedFiles.forEach((file) => {
+                  formData.append("files", file); // 'files'是后端期望的文件字段名
+                });
                 messageText +=
                   " [附件: " +
                   this.uploadedFiles.map((f) => f.name).join(", ") +
                   "]";
               }
-              this.messages.push({
-                id: Date.now(),
-                sender: "user",
-                text: messageText,
-              });
+              formData.append("message", messageText); // 添加文本消息到表单数据中
+
+              // 发起POST请求
+              axios
+                .post("http://your-backend-url/api/messages", formData, {
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
+                })
+                .then((response) => {
+                  // 处理响应
+                  const aiMessage = response.data;
+
+                  console.log("Message sent successfully", response.data);
+                })
+                .catch((error) => {
+                  // 处理错误
+                  console.error("Error sending message:", error);
+                });
+
               // 清空用户输入框和已上传文件数组
               this.userInput = "";
               this.uploadedFiles = [];
 
-              // Simulate AI response
-              setTimeout(() => {
-                const shouldGenerateImage = messageText.includes("生成图片");
-                const shouldGenerateChart = messageText.includes("生成图表");
-                // 获取选择的图表类型，如果没有选择则默认为垂直条形图
-                const chartType = this.selectedChartType || "垂直条形图";
-                let responseText = "这是AI的回复。";
-                if (shouldGenerateImage) {
-                  responseText += "我已经为您生成了一张图片。";
-                }
-                if (shouldGenerateChart) {
-                  responseText += `我已经为您生成了一个${chartType}。`;
-                }
-                // 将 AI 的回复添加到消息数组中，并设置相应的属性
-                this.messages.push({
-                  id: Date.now(),
-                  sender: "ai",
-                  text: responseText,
-                  hasText: true,
-                  hasChart: shouldGenerateChart,
-                  hasImage: shouldGenerateImage,
-                });
-              }, 1000);
+              // 将 AI 的回复添加到消息数组中，并设置相应的属性
+              this.messages.push({
+                id: aiMessage.id,
+                sender: "ai",
+                text: aiMessage.text,
+                hasText: aiMessage.hasText,
+                hasChart: aiMessage.hasChart,
+                hasImage: aiMessage.hasImage,
+              });
             }
           },
           // 触发文件上传的方法，通过点击隐藏的文件输入框来实现
