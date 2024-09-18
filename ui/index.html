@@ -427,37 +427,37 @@
                 .then((response) => {
                   // 处理响应
                   const aiMessage = response.data;
-
                   console.log("Message sent successfully", response.data);
+
+                  // 清空用户输入框和已上传文件数组
+                  this.userInput = "";
+                  this.uploadedFiles = [];
+                  // 将 AI 的回复添加到消息数组中，并设置相应的属性
+                  const message = {
+                    id: aiMessage.id,
+                    sender: "ai",
+                    text: aiMessage.text,
+                    hasText: aiMessage.hasText,
+                    hasChart: aiMessage.hasChart,
+                    hasImage: aiMessage.hasImage,
+                  };
+                  if (hasChart) {
+                    this.messages.push({
+                      chartUrl: aiMessage.chartUrl,
+                    });
+                  }
+                  if (hasImage) {
+                    this.messages.push({
+                      imageUrl: aiMessage.imageUrl,
+                    });
+                  }
+
+                  this.messages.push(message);
                 })
                 .catch((error) => {
                   // 处理错误
                   console.error("Error sending message:", error);
                 });
-
-              // 清空用户输入框和已上传文件数组
-              this.userInput = "";
-              this.uploadedFiles = [];
-
-              // 将 AI 的回复添加到消息数组中，并设置相应的属性
-              this.messages.push({
-                id: aiMessage.id,
-                sender: "ai",
-                text: aiMessage.text,
-                hasText: aiMessage.hasText,
-                hasChart: aiMessage.hasChart,
-                hasImage: aiMessage.hasImage,
-              });
-              if (hasChart) {
-                this.messages.push({
-                  chartUrl: aiMessage.chartUrl,
-                });
-              }
-              if (hasImage) {
-                this.messages.push({
-                  imageUrl: aiMessage.imageUrl,
-                });
-              }
             }
           },
           // 触发文件上传的方法，通过点击隐藏的文件输入框来实现
