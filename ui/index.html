@@ -277,10 +277,10 @@
                     <!-- 否则显示一个用于代表用户的空白区域 -->
                     <div v-else class="user-avatar"></div>  
                   </div>
-                  <div v-if="hasChart" class="message-text">
+                  <div v-if="message.hasChart" class="message-text">
                     <a :href="message.chartUrl" target="_blank">查看图表</a>
                   </div>
-                  <div v-if="hasImage" class="message-text">
+                  <div v-if="message.hasImage" class="message-text">
                     <img :src="message.imageUrl" alt="Image" />
                   </div>
                   <div class="message-text">{{ message.text }}</div>
