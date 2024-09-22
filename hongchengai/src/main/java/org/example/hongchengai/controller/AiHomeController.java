@@ -1,37 +1,45 @@
 package org.example.hongchengai.controller;
 
 
-import org.example.hongchengai.pojo.dto.MessageDto;
-import org.example.hongchengai.service.AiService;
-import org.springframework.stereotype.Controller;
+import org.example.hongchengai.pojo.dto.ReceiveMessageDto;
+import org.example.hongchengai.pojo.dto.ReturnMessageDto;
+
+
+import org.example.hongchengai.service.IReturnService;
+import org.example.hongchengai.service.ReturnService;
+
 import org.springframework.web.bind.annotation.*;
 
-import org.example.hongchengai.service.IAiService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 public class AiHomeController {
-    IAiService ai = new AiService();
+    int answerTimes = 0;
+
+    IReturnService returnService = new ReturnService();
     /**
      *  用户提出的问
      * @return  AI的回答
      */
 
-    @PostMapping("/home")
-    public MessageDto homePost(@RequestBody MessageDto messageDto){
-        System.out.println(messageDto);
-        String aiResponse = ai.ask(messageDto) + "成功处理";
-        MessageDto response = new MessageDto();
-        response.setText(aiResponse);
-        return response;
-        //System.out.println(formData);
-        //return formData + "解决";
-    }
-//    @PostMapping("/")
-//    public String sendData(@RequestBody MyData data){
-//        System.out.println(data);
-//        return "success";
+//    @PostMapping("/home")
+//    public ReturnMessageDto homePost(@RequestBody ReceiveMessageDto receiveMessageDto){
+//        System.out.println(receiveMessageDto);
+//        String aiResponse = "成功处理";
+//        ReturnMessageDto returnMessageDto = new ReturnMessageDto();
+//        returnMessageDto.setText(aiResponse);
+//        return returnMessageDto;
+//
 //    }
+    @PostMapping("/send")
+    public ReturnMessageDto homePost(@ModelAttribute ReceiveMessageDto receiveMessageDto){
+        answerTimes++;
+        try {
+            return returnService.returnResult(receiveMessageDto, answerTimes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
 }
