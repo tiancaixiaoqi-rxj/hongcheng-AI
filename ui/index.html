@@ -332,6 +332,7 @@
                 v-model="userInput"
                 placeholder="随时为您服务，帮您解决任何问题"
                 @keydown.enter.prevent="sendMessage"
+                :disabled="isWaitingForResponse"
               ></textarea>
               <input
                 type="file"
@@ -339,17 +340,25 @@
                 style="display: none"
                 @change="handleFileUpload"
                 multiple
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                :disabled="isWaitingForResponse"
               />
               <!-- 上传按钮，点击触发 triggerFileUpload 方法，按钮标题为上传文件 -->
               <button
                 class="upload-btn"
                 @click="triggerFileUpload"
                 title="上传文件"
+                :disabled="isWaitingForResponse "
               >
                 <span class="mdi mdi-upload"></span>
               </button>
               <!-- 发送按钮，点击调用 sendMessage 方法，按钮标题为发送 -->
-              <button class="send-btn" @click="sendMessage" title="发送">
+              <button
+                class="send-btn"
+                @click="sendMessage"
+                title="发送"
+                :disabled="isWaitingForResponse"
+              >
                 <span class="mdi mdi-send"></span>
               </button>
             </div>
@@ -393,7 +402,8 @@
           ],
           uploadedFiles: [],
           userAvatarUrl: "",
-        },
+          isWaitingForResponse: false,
+        }, 
         methods: {
           //发送消息的方法
 
@@ -422,6 +432,7 @@
               });
               this.userInput = "";
               this.uploadedFiles = [];
+              this.isWaitingForResponse = true;
 
               formData.append("message", messageText); // 添加文本消息到表单数据中
 
@@ -435,11 +446,10 @@
 
                   // 清空用户输入框和已上传文件数组
 
-
                   // 将 AI 的回复添加到消息数组中，并设置相应的属性
                   const message = {
                     id: aiMessage.id,
-                    sender: "ai",
+                    sender: aiMessage.sender,
                     text: aiMessage.text,
                     hasText: aiMessage.hasText,
                     hasChart: aiMessage.hasChart,
@@ -455,13 +465,15 @@
                       imageUrl: aiMessage.imageUrl,
                     });
                   }
-
                   this.messages.push(message);
+                  this.isWaitingForResponse = false
                 })
                 .catch((error) => {
                   // 处理错误
                   console.error("Error sending message:", error);
+                  this.isWaitingForResponse = false
                 });
+                         
             }
           },
           // 触发文件上传的方法，通过点击隐藏的文件输入框来实现
