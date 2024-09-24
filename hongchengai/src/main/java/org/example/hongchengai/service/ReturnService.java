@@ -3,6 +3,7 @@ package org.example.hongchengai.service;
 import org.example.hongchengai.pojo.dto.ReceiveMessageDto;
 import org.example.hongchengai.pojo.dto.ReturnMessageDto;
 
+import java.io.IOException;
 import java.nio.file.*;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
@@ -10,28 +11,31 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 public class ReturnService implements IReturnService {
     /**
-     *
      * @param receiveMessageDto 用户传来的数据
-     * @param answerTimes   回答次数
-     * @return  处理好的返回数据
+     * @param answerTimes       回答次数
+     * @return 处理好的返回数据
      */
     @Override
-    public ReturnMessageDto returnResult(ReceiveMessageDto receiveMessageDto,int answerTimes) throws Exception{
+    public ReturnMessageDto returnResult(ReceiveMessageDto receiveMessageDto, int answerTimes) throws Exception {
+        //用于数据的读写对象
         IIOService ioService = new IOService();
+        //用户问题及ai回答数据
         String questionsPath = "F:\\AI\\questions.txt";
         String answersPath = "F:\\AI\\answers.txt";
+        // 创建questions.txt文件
+        createFileIfNotExists(questionsPath);
+        createFileIfNotExists(answersPath);
+        // 创建answers.txt文件
+        createFileIfNotExists(answersPath);
         ioService.writeFile(questionsPath, receiveMessageDto.getMessage());
-        Path path = Paths.get(answersPath);
 
+        Path path = Paths.get(answersPath);
         // 获取文件所在的目录
         Path dir = path.getParent();
-
         // 创建WatchService
         WatchService watchService = FileSystems.getDefault().newWatchService();
-
         // 注册WatchService来监听目录内的变化事件（创建、修改、删除）
         dir.register(watchService, ENTRY_MODIFY);
-
         System.out.println("监听文件的变化: " + path.getFileName());
 
         // 等待直到事件发生 (阻塞)
@@ -55,10 +59,21 @@ public class ReturnService implements IReturnService {
         watchService.close();
 
 
+        return new ReturnMessageDto(answerTimes + 1, "ai", ioService.readFile(answersPath), true, false, false);
+    }
 
-        ReturnMessageDto returnMessageDto = new ReturnMessageDto(answerTimes+1,"ai",
-                ioService.readFile(answersPath),true,false,false);
+    private void createFileIfNotExists(String filePath) throws IOException {
+        Path path = Paths.get(filePath);
+        Path directoryPath = path.getParent(); // 获取目录路径
 
-        return returnMessageDto;
+        // 创建目录（如果不存在）
+        if (!Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);
+        }
+
+        // 创建文件（如果不存在）
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
     }
 }

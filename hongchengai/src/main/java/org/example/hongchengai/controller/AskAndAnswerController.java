@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+
 
 @RestController
 public class AskAndAnswerController {
@@ -29,9 +31,20 @@ public class AskAndAnswerController {
         ReceiveMessageDto receiveMessageDto = new ReceiveMessageDto();
         receiveMessageDto.setMessage(message);
 
+
         if (file != null && !file.isEmpty()) {
             receiveMessageDto.setFiles(file);
+
             String infoPath = "F:\\AI\\files\\info.txt";
+            Path filePath = Paths.get(infoPath);
+            Path directoryPath = filePath.getParent();
+            if (!Files.exists(directoryPath)) {
+                Files.createDirectories(directoryPath);
+            }
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+            }
+
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(infoPath));
             String infos = "Received file: " + file.getOriginalFilename() + "\nFile type: "+ file.getContentType();
             writer.write(infos);
