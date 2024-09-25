@@ -438,7 +438,7 @@
 
               // 发起POST请求
               axios
-                .post("http://localhost:8080/upload", formData)
+                .post("http://localhost:8080/api/upload", formData)
                 .then((response) => {
                   // 处理响应
                   const aiMessage = response.data;
