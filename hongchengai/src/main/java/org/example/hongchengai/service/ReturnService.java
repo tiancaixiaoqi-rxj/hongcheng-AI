@@ -32,34 +32,44 @@ public class ReturnService implements IReturnService {
         Path path = Paths.get(answersPath);
         // 获取文件所在的目录
         Path dir = path.getParent();
-        // 创建WatchService
-        WatchService watchService = FileSystems.getDefault().newWatchService();
-        // 注册WatchService来监听目录内的变化事件（创建、修改、删除）
-        dir.register(watchService, ENTRY_MODIFY);
-        System.out.println("监听文件的变化: " + path.getFileName());
+        String content = "";
+        WatchService watchService = null;
+        while (content.length()<1){
+            // 创建WatchService
+            watchService = FileSystems.getDefault().newWatchService();
+            // 注册WatchService来监听目录内的变化事件（创建、修改、删除）
+            dir.register(watchService, ENTRY_MODIFY);
+            System.out.println("监听文件的变化: " + path.getFileName());
 
-        // 等待直到事件发生 (阻塞)
-        WatchKey key = watchService.take();
+            // 等待直到事件发生 (阻塞)
+            WatchKey key = watchService.take();
 
-        // 遍历所有事件
-        for (WatchEvent<?> event : key.pollEvents()) {
-            // 获取事件的类型
-            WatchEvent.Kind<?> kind = event.kind();
+            // 遍历所有事件
+            for (WatchEvent<?> event : key.pollEvents()) {
+                // 获取事件的类型
+                WatchEvent.Kind<?> kind = event.kind();
 
-            // 获取发生变化的文件名
-            Path changedFile = (Path) event.context();
+                // 获取发生变化的文件名
+                Path changedFile = (Path) event.context();
 
-            // 检查是否是我们要监听的特定文件
-            if (kind == ENTRY_MODIFY && changedFile.equals(path.getFileName())) {
-                System.out.println("文件已修改: " + changedFile);
-                // 这里可以添加对文件变化的处理逻辑
-                break;  // 停止监听，如果只需要检测一次变化
+                // 检查是否是我们要监听的特定文件
+                if (kind == ENTRY_MODIFY && changedFile.equals(path.getFileName())) {
+                    System.out.println("文件已修改: " + changedFile);
+                    // 这里可以添加对文件变化的处理逻辑
+                    content =  ioService.readFile(answersPath).strip();
+                    System.out.println(content.length());
+                    System.out.println("内部" + content);
+                    break;  // 停止监听，如果只需要检测一次变化
+                }
             }
         }
+
+
         watchService.close();
+        System.out.println("外部"+content);
 
 
-        return new ReturnMessageDto(answerTimes + 1, "ai", ioService.readFile(answersPath), true, false, false);
+        return new ReturnMessageDto(answerTimes + 1, "ai", content, true, false, false);
     }
 
     private void createFileIfNotExists(String filePath) throws IOException {

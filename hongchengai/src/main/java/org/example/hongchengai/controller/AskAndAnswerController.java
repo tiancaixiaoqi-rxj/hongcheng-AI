@@ -33,7 +33,6 @@ public class AskAndAnswerController {
         ReceiveMessageDto receiveMessageDto = new ReceiveMessageDto();
         receiveMessageDto.setMessage(message);
 
-
         if (file != null && !file.isEmpty()) {
             receiveMessageDto.setFiles(file);
 

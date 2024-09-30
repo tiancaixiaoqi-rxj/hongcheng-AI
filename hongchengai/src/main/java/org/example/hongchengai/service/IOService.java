@@ -34,13 +34,14 @@ public class IOService implements IIOService{
     @Override
     public String readFile(String path) {
         BufferedReader reader = null;
-        String content = "";
+        StringBuffer content  = new StringBuffer();
         try {
 
             String line = null;
             reader = new BufferedReader(new FileReader(path));
             while((line = reader.readLine())!=null){
-                content += line;
+                content.append(line);
+                content.append("\n");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -51,7 +52,7 @@ public class IOService implements IIOService{
                 throw new RuntimeException(e);
             }
         }
-        return content;
+        return String.format("%-" + 30 +"s",content.toString()) ;
     }
 
 
