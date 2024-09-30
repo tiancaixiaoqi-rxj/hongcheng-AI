@@ -194,6 +194,8 @@
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         font-size: 16px;
         line-height: 1.4;
+        white-space: pre-wrap; /* 保留换行符并在必要时进行换行 */
+        word-wrap: break-word; /* 超出单词长度的单词将被拆分 */
       }
       .user-message {
         flex-direction: row-reverse;
@@ -403,7 +405,7 @@
           uploadedFiles: [],
           userAvatarUrl: "",
           isWaitingForResponse: false,
-        }, 
+        },
         methods: {
           //发送消息的方法
 
@@ -466,14 +468,13 @@
                     });
                   }
                   this.messages.push(message);
-                  this.isWaitingForResponse = false
+                  this.isWaitingForResponse = false;
                 })
                 .catch((error) => {
                   // 处理错误
                   console.error("Error sending message:", error);
-                  this.isWaitingForResponse = false
+                  this.isWaitingForResponse = false;
                 });
-                         
             }
           },
           // 触发文件上传的方法，通过点击隐藏的文件输入框来实现
